@@ -11,14 +11,14 @@ int main(int argc, char *argv[]) {
         "const",  "true", "false"
     };
 
-    string afd;
-    if (argc > 1) {
-        afd = argv[1];
-    } else {
-        ifstream testComp("testeComp.jff");
+    string afd = "testeComp.jff";;
+    string testFile;
 
-        if (testComp.good()) afd = "testeComp.jff";
-        else afd = "afd.jff";
+    if (argc > 1) {
+        testFile = argv[1];
+        cout << testFile << endl;
+    } else {
+        testFile = "input.txt";
     }
 
     Lexical lexical;
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (!lexical.run("input.txt", reservedKeywords)) {
+    if (!lexical.run(testFile, reservedKeywords)) {
         cerr << "Nao foi possivel abrir input.txt" << endl;
         return 1;
     }
