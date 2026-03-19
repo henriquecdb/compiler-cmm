@@ -255,9 +255,7 @@ bool Lexical::accepts(const string &lexeme) const {
 
 bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
     ifstream inputFile(inputPath);
-    if (!inputFile.is_open()) {
-        return false;
-    }
+    if (!inputFile.is_open()) return false;
 
     string input((istreambuf_iterator<char>(inputFile)),
                  istreambuf_iterator<char>());
@@ -267,12 +265,83 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         reservedSet.insert(stringToLower(word));
     }
 
-    string lastTokenType;
     size_t i = 0;
+
     while (i < input.size()) {
-        unsigned char current = static_cast<unsigned char>(input[i]);
+        unsigned char current = input[i];
+
+        if (current == '/' && i + 1 < input.size() && input[i + 1] == '*') {
+            i += 2;
+            while (i + 1 < input.size() && !(input[i] == '*' && input[i + 1] == '/')) {
+                i++;
+            }
+            if (i + 1 < input.size()) i += 2;
+            else cout << "Erro lexico: comentario nao fechado\n";
+            continue;
+        }
+
         if (isspace(current)) {
-            ++i;
+            i++;
+            continue;
+        }
+
+        if (isalpha(current) || current == '_') {
+            size_t j = i;
+            bool erro = false;
+
+            while (j < input.size()) {
+                unsigned char c = input[j];
+
+                if (isalnum(c) || c == '_') {
+                    j++;
+                } else{
+                    break;
+                } 
+            }
+
+            string lexeme = input.substr(i, j - i);
+            string lowerLexeme = stringToLower(lexeme);
+
+            if (erro) {
+                cout << "Erro lexico:" << lexeme << '\n';
+            } 
+            else if (reservedSet.count(lowerLexeme)) {
+                transform(lowerLexeme.begin(), lowerLexeme.end(), lowerLexeme.begin(), ::toupper);
+                cout << lowerLexeme << '\n';
+            } 
+            else {
+                cout << "ID." << lexeme << '\n';
+            }
+
+            i = j;
+            continue;
+        }
+
+        if (isdigit(current)) {
+            size_t j = i;
+            bool hasDot = false;
+            bool erro = false;
+
+            while (j < input.size()) {
+                unsigned char c = input[j];
+
+                if (isdigit(c)) j++;
+                else if (c == '.') {
+                    if (hasDot) erro = true;
+                    hasDot = true;
+                    j++;
+                } else break;
+            }
+
+            string lexeme = input.substr(i, j - i);
+
+            if (erro || lexeme.back() == '.') {
+                cout << "Erro lexico:" << lexeme << '\n';
+            } else {
+                cout << "NUM." << lexeme << '\n';
+            }
+
+            i = j;
             continue;
         }
 
@@ -282,278 +351,53 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         size_t j = i;
 
         while (j < input.size()) {
-            unsigned char ch = static_cast<unsigned char>(input[j]);
+            unsigned char ch = input[j];
             int next = transitionTable_[state][ch];
-            if (next < 0) {
-                break;
-            }
+            if (next < 0) break;
 
             state = next;
-            ++j;
-            if (validFinalStates_.find(state) != validFinalStates_.end()) {
+            j++;
+
+            if (validFinalStates_.count(state)) {
                 lastFinalState = state;
                 lastFinalPos = j;
             }
         }
+        //cout << lastFinalState <<endl;
+        if (lastFinalState >= 0 && lastFinalPos > i) {
+            string lexeme = input.substr(i, lastFinalPos - i);
 
-        if (lastFinalState < 0 || lastFinalPos == i) {
-            unsigned char first = static_cast<unsigned char>(input[i]);
-            if (isalpha(first) || first == '_') {
-                size_t j2 = i;
-                while (j2 < input.size()) {
-                    unsigned char c2 = static_cast<unsigned char>(input[j2]);
-                    if (!(isalnum(c2) || c2 == '_')) {
-                        break;
-                    }
-                    ++j2;
-                }
+            if (lexeme == "(") cout << "LPARENT\n";
+            else if (lexeme == ")") cout << "RPARENT\n";
+            else if (lexeme == "{") cout << "LBRACE\n";
+            else if (lexeme == "}") cout << "RBRACE\n";
+            else if (lexeme == "[") cout << "LBRACKET\n";
+            else if (lexeme == "]") cout << "RBRACKET\n";
+            else if (lexeme == ",") cout << "COMMA\n";
+            else if (lexeme == ";") cout << "SEMICOLON\n";
+            else if (lexeme == "+") cout << "PLUS\n";
+            else if (lexeme == "-") cout << "MINUS\n";
+            else if (lexeme == "*") cout << "MULT\n";
+            else if (lexeme == "/") cout << "DIV\n";
+            else if (lexeme == "%") cout << "MOD\n";
+            else if (lexeme == "=") cout << "ASSING\n";
+            else if (lexeme == "<") cout << "LT\n";
+            else if (lexeme == ">") cout << "GT\n";
+            else if (lexeme == "<=") cout << "LEQ\n";
+            else if (lexeme == ">=") cout << "GEQ\n";
+            else if (lexeme == "==") cout << "EQ\n";
+            else if (lexeme == "!=") cout << "NEQ\n";
+            else if (lexeme == "&&") cout << "AND\n";
+            else if (lexeme == "||") cout << "OR\n";
+            else cout << "Erro lexico: " << lexeme << '\n';
 
-                string lexeme = input.substr(i, j2 - i);
-                string lowerLexeme = stringToLower(lexeme);
-                if (reservedSet.find(lowerLexeme) != reservedSet.end()) {
-                    string keyword = lowerLexeme;
-                    transform(keyword.begin(), keyword.end(), keyword.begin(),
-                              [](unsigned char c) { return static_cast<char>(toupper(c)); });
-                    cout << keyword << '\n';
-                    lastTokenType = keyword;
-                } else {
-                    cout << "ID." << lexeme << '\n';
-                    lastTokenType = "ID";
-                }
-                i = j2;
-                continue;
-            }
-
-            if (isdigit(first)) {
-                size_t j2 = i;
-                bool hasDot = false;
-                while (j2 < input.size()) {
-                    unsigned char c2 = static_cast<unsigned char>(input[j2]);
-                    if (isdigit(c2)) {
-                        ++j2;
-                        continue;
-                    }
-                    if (c2 == '.' && !hasDot) {
-                        hasDot = true;
-                        ++j2;
-                        continue;
-                    }
-                    break;
-                }
-
-                string lexeme = input.substr(i, j2 - i);
-                if (hasDot) {
-                    cout << "NUM." << lexeme << '\n';
-                    lastTokenType = "NUM";
-                } else {
-                    if (lastTokenType == "ASSING") {
-                        cout << "NUMINT." << lexeme << '\n';
-                        lastTokenType = "NUMINT";
-                    } else {
-                        cout << "NUM." << lexeme << '\n';
-                        lastTokenType = "NUM";
-                    }
-                }
-                i = j2;
-                continue;
-            }
-
-            string two;
-            if (i + 1 < input.size()) {
-                two = input.substr(i, 2);
-            }
-
-            if (two == "<=") {
-                cout << "LEQ" << '\n';
-                lastTokenType = "LEQ";
-                i += 2;
-                continue;
-            }
-            if (two == ">=") {
-                cout << "GEQ" << '\n';
-                lastTokenType = "GEQ";
-                i += 2;
-                continue;
-            }
-            if (two == "==") {
-                cout << "EQ" << '\n';
-                lastTokenType = "EQ";
-                i += 2;
-                continue;
-            }
-            if (two == "!=") {
-                cout << "NEQ" << '\n';
-                lastTokenType = "NEQ";
-                i += 2;
-                continue;
-            }
-            if (two == "&&") {
-                cout << "AND" << '\n';
-                lastTokenType = "AND";
-                i += 2;
-                continue;
-            }
-            if (two == "||") {
-                cout << "OR" << '\n';
-                lastTokenType = "OR";
-                i += 2;
-                continue;
-            }
-
-            char single = input[i];
-            if (single == '(') {
-                cout << "LPARENT" << '\n';
-                lastTokenType = "LPARENT";
-                ++i;
-                continue;
-            }
-            if (single == ')') {
-                cout << "RPARENT" << '\n';
-                lastTokenType = "RPARENT";
-                ++i;
-                continue;
-            }
-            if (single == ';') {
-                cout << "SEMICOLON" << '\n';
-                lastTokenType = "SEMICOLON";
-                ++i;
-                continue;
-            }
-            if (single == '=') {
-                cout << "ASSING" << '\n';
-                lastTokenType = "ASSING";
-                ++i;
-                continue;
-            }
-
-            cout << "Erro léxico: " << input[i] << '\n';
-            ++i;
-            continue;
-        }
-
-        string lexeme = trim(input.substr(i, lastFinalPos - i));
-        if (lexeme.empty()) {
             i = lastFinalPos;
             continue;
         }
-        string lowerLexeme = stringToLower(lexeme);
-
-        if (reservedSet.find(lowerLexeme) != reservedSet.end()) {
-            string keyword = lowerLexeme;
-            transform(
-                keyword.begin(), keyword.end(), keyword.begin(),
-                [](unsigned char c) { return static_cast<char>(toupper(c)); });
-            cout << keyword << '\n';
-            lastTokenType = keyword;
-            i = lastFinalPos;
-            continue;
-        }
-
-        string tokenType;
-        if (lexeme == "(")
-            tokenType = "LPARENT";
-        else if (lexeme == ")")
-            tokenType = "RPARENT";
-        else if (lexeme == "{")
-            tokenType = "LBRACE";
-        else if (lexeme == "}")
-            tokenType = "RBRACE";
-        else if (lexeme == "[")
-            tokenType = "LBRACKET";
-        else if (lexeme == "]")
-            tokenType = "RBRACKET";
-        else if (lexeme == ";")
-            tokenType = "SEMICOLON";
-        else if (lexeme == "+")
-            tokenType = "PLUS";
-        else if (lexeme == "++")
-            tokenType = "INC";
-        else if (lexeme == "-")
-            tokenType = "MINUS";
-        else if (lexeme == "--")
-            tokenType = "DEC";
-        else if (lexeme == "*")
-            tokenType = "MULT";
-        else if (lexeme == "/")
-            tokenType = "DIV";
-        else if (lexeme == "%")
-            tokenType = "MOD";
-        else if (lexeme == "=")
-            tokenType = "ASSING";
-        else if (lexeme == "==")
-            tokenType = "EQ";
-        else if (lexeme == "!=")
-            tokenType = "NEQ";
-        else if (lexeme == "<")
-            tokenType = "LT";
-        else if (lexeme == "<=")
-            tokenType = "LEQ";
-        else if (lexeme == ">")
-            tokenType = "GT";
-        else if (lexeme == ">=")
-            tokenType = "GEQ";
-        else if (lexeme == "&&")
-            tokenType = "AND";
-        else if (lexeme == "||")
-            tokenType = "OR";
-        else if (!lexeme.empty() &&
-                 (isalpha(static_cast<unsigned char>(lexeme[0])) || lexeme[0] == '_')) {
-            bool isIdentifier = true;
-            for (char ch : lexeme) {
-                unsigned char uch = static_cast<unsigned char>(ch);
-                if (!(isalnum(uch) || ch == '_')) {
-                    isIdentifier = false;
-                    break;
-                }
-            }
-
-            if (isIdentifier) {
-                tokenType = "ID." + lexeme;
-            }
-        } else if (!lexeme.empty() && isdigit(static_cast<unsigned char>(lexeme[0]))) {
-            bool isNumeric = true;
-            bool hasDot = false;
-            for (char ch : lexeme) {
-                if (ch == '.' && !hasDot) {
-                    hasDot = true;
-                    continue;
-                }
-                if (!isdigit(static_cast<unsigned char>(ch))) {
-                    isNumeric = false;
-                    break;
-                }
-            }
-
-            if (isNumeric) {
-                if (hasDot) {
-                    tokenType = "NUM." + lexeme;
-                } else if (lastTokenType == "ASSING") {
-                    tokenType = "NUMINT." + lexeme;
-                } else {
-                    tokenType = "NUM." + lexeme;
-                }
-            }
-        }
-
-        if (tokenType.empty()) {
-            string stateName = stringToLower(stateNames_[lastFinalState]);
-            if (stateName == "real" || lexeme.find('.') != string::npos) {
-                tokenType = "NUM." + lexeme;
-            } else if (stateName == "int") {
-                if (lastTokenType == "ASSING")
-                    tokenType = "NUMINT." + lexeme;
-                else
-                    tokenType = "NUM." + lexeme;
-            } else {
-                tokenType = "ID." + lexeme;
-            }
-        }
-
-        cout << tokenType << '\n';
-        lastTokenType = tokenType;
-        i = lastFinalPos;
+        cout << "Erro lexico: a" << current << '\n';
+        i++;
     }
 
-    cout << "EOF" << '\n';
+    cout << "EOF\n";
     return true;
 }
