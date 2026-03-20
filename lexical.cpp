@@ -254,6 +254,7 @@ bool Lexical::accepts(const string &lexeme) const {
 }
 
 bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
+    unordered_map<string, string> symbolTable;
     ifstream inputFile(inputPath);
     if (!inputFile.is_open()) return false;
 
@@ -310,6 +311,9 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 cout << lowerLexeme << '\n';
             } 
             else {
+                if (symbolTable.find(lexeme) == symbolTable.end()) {
+                    symbolTable[lexeme];
+                }
                 cout << "ID." << lexeme << '\n';
             }
 
@@ -366,7 +370,10 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         //cout << lastFinalState <<endl;
         if (lastFinalState >= 0 && lastFinalPos > i) {
             string lexeme = input.substr(i, lastFinalPos - i);
-
+            if (stateNames_[lastFinalState] == "EHD"){ //funcao do * (pega -1 caractere para formar o token)
+                lexeme = lexeme.substr(0, lexeme.size() - 1);
+                lastFinalPos--; 
+            }
             if (lexeme == "(") cout << "LPARENT\n";
             else if (lexeme == ")") cout << "RPARENT\n";
             else if (lexeme == "{") cout << "LBRACE\n";
@@ -375,18 +382,21 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             else if (lexeme == "]") cout << "RBRACKET\n";
             else if (lexeme == ",") cout << "COMMA\n";
             else if (lexeme == ";") cout << "SEMICOLON\n";
-            else if (lexeme == "+") cout << "PLUS\n";
+            else if (lexeme == "+") cout << "PLUS\n"; 
+            else if (lexeme == "++") cout << "INC\n"; 
             else if (lexeme == "-") cout << "MINUS\n";
-            else if (lexeme == "*") cout << "MULT\n";
+            else if (lexeme == "--") cout << "DEC\n";
+            else if (lexeme == "*") cout << "MULT\n"; 
             else if (lexeme == "/") cout << "DIV\n";
             else if (lexeme == "%") cout << "MOD\n";
             else if (lexeme == "=") cout << "ASSING\n";
             else if (lexeme == "<") cout << "LT\n";
-            else if (lexeme == ">") cout << "GT\n";
+            else if (lexeme == ">") cout << "GT\n"; 
             else if (lexeme == "<=") cout << "LEQ\n";
             else if (lexeme == ">=") cout << "GEQ\n";
             else if (lexeme == "==") cout << "EQ\n";
             else if (lexeme == "!=") cout << "NEQ\n";
+            else if (lexeme == "!") cout << "NEG\n";
             else if (lexeme == "&&") cout << "AND\n";
             else if (lexeme == "||") cout << "OR\n";
             else cout << "Erro lexico: " << lexeme << '\n';
@@ -394,10 +404,15 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             i = lastFinalPos;
             continue;
         }
-        cout << "Erro lexico: a" << current << '\n';
+        cout << "Erro lexico: " << current << '\n';
         i++;
     }
 
     cout << "EOF\n";
+
+    cout << "\n\nTabela de Simbolos:\n";
+    for (const auto &entry : symbolTable) {
+        cout << entry.first << '\n';
+    }
     return true;
 }

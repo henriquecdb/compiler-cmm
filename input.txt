@@ -1,1 +1,17 @@
-if(x1 <= 32) b = 10;
+/* ===== TESTE 10: programa mais completo ===== */
+int main(){
+    int x;
+    float y;
+
+    x = 10;
+    y = 3.5;
+    z = 0;
+
+    if(x >= 10){
+        print(x);
+    }else{
+        readln(x);
+    }
+
+    return x;
+}

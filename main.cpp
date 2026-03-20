@@ -8,7 +8,8 @@ int main(int argc, char *argv[]) {
         "if",     "else", "while",   "for",  "return", "int",
         "float",  "char", "double",  "void", "break",  "continue",
         "switch", "case", "default", "do",   "struct", "typedef",
-        "const",  "true", "false"
+        "const",  "true", "false", "readln", "bool", "print", "main",
+        "string", "class", "static", "include", "define","using","vector"
     };
 
     string afd = "testeComp.jff";;
