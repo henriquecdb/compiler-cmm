@@ -308,6 +308,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 cout << "Erro lexico:" << lexeme << '\n';
             } 
             else if (reservedSet.count(lowerLexeme)) {
+                sb.insert(lexeme, "PALAVRA_RESERVADA");
                 transform(lowerLexeme.begin(), lowerLexeme.end(), lowerLexeme.begin(), ::toupper);
                 cout << lowerLexeme << '\n';
             } 
