@@ -40,8 +40,8 @@
 			<final/>&#13;
 		</state>&#13;
 		<state id="8" name="20">&#13;
-			<x>870.0</x>&#13;
-			<y>805.0</y>&#13;
+			<x>871.0</x>&#13;
+			<y>828.0</y>&#13;
 		</state>&#13;
 		<state id="9" name="21">&#13;
 			<x>936.0</x>&#13;
@@ -360,6 +360,11 @@
 		</transition>&#13;
 		<transition>&#13;
 			<from>0</from>&#13;
+			<to>8</to>&#13;
+			<read>.</read>&#13;
+		</transition>&#13;
+		<transition>&#13;
+			<from>0</from>&#13;
 			<to>31</to>&#13;
 			<read>]</read>&#13;
 		</transition>&#13;
@@ -476,6 +481,11 @@
 		<transition>&#13;
 			<from>1</from>&#13;
 			<to>42</to>&#13;
+			<read>outro</read>&#13;
+		</transition>&#13;
+		<transition>&#13;
+			<from>8</from>&#13;
+			<to>39</to>&#13;
 			<read>outro</read>&#13;
 		</transition>&#13;
 		<transition>&#13;

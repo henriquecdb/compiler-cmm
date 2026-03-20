@@ -256,6 +256,8 @@ bool Lexical::accepts(const string &lexeme) const {
 
 bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
     SymbolTable sb;
+    int linhaAtual = 1;
+    int colunaAtual = 1;
     ifstream inputFile(inputPath);
     if (!inputFile.is_open()) return false;
 
@@ -275,18 +277,35 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         if (current == '/' && i + 1 < input.size() && input[i + 1] == '*') {
             i += 2;
             while (i + 1 < input.size() && !(input[i] == '*' && input[i + 1] == '/')) {
+                if (input[i] == '\n') {
+                    linhaAtual++;
+                    colunaAtual = 1;
+                } else {
+                    colunaAtual++;
+                }
                 i++;
             }
-            if (i + 1 < input.size()) i += 2;
+            if (i + 1 < input.size()){
+                i += 2;
+                colunaAtual +=2;
+            }
             else cout << "Erro lexico: comentario nao fechado\n";
             continue;
         }
 
         if (isspace(current)) {
+            if (current == '\n') {
+                linhaAtual++;
+                colunaAtual = 1; 
+            } else {
+                colunaAtual++;   
+            }
             i++;
             continue;
         }
 
+        int colunaInicioToken = colunaAtual;
+        
         if (isalpha(current) || current == '_') {
             size_t j = i;
             bool erro = false;
@@ -308,15 +327,16 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 cout << "Erro lexico:" << lexeme << '\n';
             } 
             else if (reservedSet.count(lowerLexeme)) {
-                sb.insert(lexeme, "PALAVRA_RESERVADA");
+                sb.insert(lexeme, "PALAVRA_RESERVADA", linhaAtual, colunaInicioToken);
                 transform(lowerLexeme.begin(), lowerLexeme.end(), lowerLexeme.begin(), ::toupper);
                 cout << lowerLexeme << '\n';
             } 
             else {
-                sb.insert(lexeme, "ID");
+                sb.insert(lexeme, "ID", linhaAtual, colunaInicioToken);
                 cout << "ID." << lexeme << '\n';
             }
-
+            
+            colunaAtual += (j - i);
             i = j;
             continue;
         }
@@ -344,7 +364,8 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             } else {
                 cout << "NUM." << lexeme << '\n';
             }
-
+            
+            colunaAtual += (j - i);
             i = j;
             continue;
         }
@@ -352,19 +373,19 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         int state = initialState_;
         int lastFinalState = -1;
         size_t lastFinalPos = i;
-        size_t j = i;
+        size_t j_afd = i;
 
-        while (j < input.size()) {
-            unsigned char ch = input[j];
+        while (j_afd< input.size()) {
+            unsigned char ch = input[j_afd];
             int next = transitionTable_[state][ch];
             if (next < 0) break;
 
             state = next;
-            j++;
+            j_afd++;
 
             if (validFinalStates_.count(state)) {
                 lastFinalState = state;
-                lastFinalPos = j;
+                lastFinalPos = j_afd;
             }
         }
         //cout << lastFinalState <<endl;
@@ -400,11 +421,12 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             else if (lexeme == "&&") cout << "AND\n";
             else if (lexeme == "||") cout << "OR\n";
             else cout << "Erro lexico: " << lexeme << '\n';
-
+            
+            colunaAtual += (lastFinalPos - i);
             i = lastFinalPos;
             continue;
         }
-        cout << "Erro lexico: " << current << '\n';
+        cout << "Erro lexico: " << current << " na linha " << linhaAtual << ", col " << colunaAtual << '\n';
         i++;
     }
 
