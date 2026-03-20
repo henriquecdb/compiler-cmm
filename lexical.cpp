@@ -1,4 +1,5 @@
 #include "lexical.h"
+#include "SymbolTable.h"
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -254,7 +255,7 @@ bool Lexical::accepts(const string &lexeme) const {
 }
 
 bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
-    unordered_map<string, string> symbolTable;
+    SymbolTable sb;
     ifstream inputFile(inputPath);
     if (!inputFile.is_open()) return false;
 
@@ -311,9 +312,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 cout << lowerLexeme << '\n';
             } 
             else {
-                if (symbolTable.find(lexeme) == symbolTable.end()) {
-                    symbolTable[lexeme];
-                }
+                sb.insert(lexeme, "ID");
                 cout << "ID." << lexeme << '\n';
             }
 
@@ -410,9 +409,6 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
 
     cout << "EOF\n";
 
-    cout << "\n\nTabela de Simbolos:\n";
-    for (const auto &entry : symbolTable) {
-        cout << entry.first << '\n';
-    }
+    sb.print();
     return true;
 }
