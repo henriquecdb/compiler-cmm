@@ -2,10 +2,6 @@
 #define SYMBOLTABLE_H
 
 #include <bits/stdc++.h>
-#include <iostream>      
-#include <string>        
-#include <unordered_map>
-#include <iomanip>
 
 using namespace std;
 
