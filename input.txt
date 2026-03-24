@@ -1,6 +1,21 @@
+/* ===== TESTE 3: programa mais completo ===== */
+int main(){
+    int x;
+    float y;
+    char c , a , b;
 
-    y = "a@3d";
-    c = 'a'
-    b = ''
-    c = "
-    a
+    c = "Abcdei"
+    b = 'a'
+    a = 'ab';
+
+    x = 10;
+    y = 3.5;
+
+    if(x >= 10){
+        print(x);
+    }else{
+        readln(x);
+    }
+
+    return x;
+}

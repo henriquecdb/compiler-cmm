@@ -424,7 +424,9 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             string lexeme = input.substr(i, j - i);
 
             if (erro || lexeme.back() == '.') {
-                cout << "Erro lexico:" << lexeme << '\n';
+                cout << "Erro lexico: " << lexeme << " na linha " << linhaAtual
+                     << ", col " << colunaInicioToken << '\n';
+                
             } else {
                 cout << "NUM." << lexeme << '\n';
             }
