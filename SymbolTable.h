@@ -2,7 +2,7 @@
 #define SYMBOLTABLE_H
 
 #include <bits/stdc++.h>
-#include <fstream>    
+#include <iostream>      
 #include <string>        
 #include <unordered_map>
 #include <iomanip>
