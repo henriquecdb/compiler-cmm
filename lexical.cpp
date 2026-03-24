@@ -293,6 +293,70 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             continue;
         }
 
+        if (current == '"') {
+            int linhaInicioToken = linhaAtual;
+            int colunaInicioToken = colunaAtual;
+            size_t startContent = i + 1;
+            size_t j = startContent;
+
+            colunaAtual++;
+
+            while (j < input.size() && input[j] != '"') {
+                if (input[j] == '\n') {
+                    linhaAtual++;
+                    colunaAtual = 1;
+                } else {
+                    colunaAtual++;
+                }
+                j++;
+            }
+
+            if (j >= input.size()) {
+                cout << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
+                     << ", col " << colunaInicioToken << '\n';
+                break;
+            }
+
+            string literal = input.substr(startContent, j - startContent);
+            sb.insert(literal, "LIT_S", linhaInicioToken, colunaInicioToken);
+            cout << "LIT_S." << literal << '\n';
+
+            colunaAtual++;
+            i = j + 1;
+            continue;
+        }
+
+        if (current == '\'') {
+            int linhaInicioToken = linhaAtual;
+            int colunaInicioToken = colunaAtual;
+            size_t startContent = i + 1;
+            size_t j = startContent;
+
+            while (j < input.size() && input[j] != '\'' && input[j] != '\n') {
+                j++;
+            }
+
+            if (j >= input.size() || input[j] != '\'') {
+                cout << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
+                     << ", col " << colunaInicioToken << '\n';
+                break;
+            }
+
+            size_t contentLen = j - startContent;
+            if (contentLen > 1) {
+                string invalidLiteral = input.substr(startContent, contentLen);
+                cout << "Erro lexico: literal char invalido '" << invalidLiteral << "'\n";
+            } else {
+                string literal = input.substr(startContent, contentLen);
+                sb.insert(literal, "LIT_C", linhaInicioToken, colunaInicioToken);
+                cout << "LIT_C." << literal << '\n';
+            }
+
+            colunaAtual += static_cast<int>((j - i) + 1);
+            i = j + 1;
+            continue;
+        }
+
         if (isspace(current)) {
             if (current == '\n') {
                 linhaAtual++;

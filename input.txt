@@ -1,16 +1,6 @@
-/* ===== TESTE 10: programa mais completo ===== */
-int main(){
-    int x;
-    float y;
 
-    x = 10;
-    y = 3.5;
-
-    if(x >= 10){
-        print(x);
-    }else{
-        readln(x);
-    }
-
-    return x;
-}
+    y = "a@3d";
+    c = 'a'
+    b = ''
+    c = "
+    a
