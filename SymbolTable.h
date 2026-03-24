@@ -2,7 +2,7 @@
 #define SYMBOLTABLE_H
 
 #include <bits/stdc++.h>
-#include <iostream>      
+#include <fstream>    
 #include <string>        
 #include <unordered_map>
 #include <iomanip>
@@ -14,6 +14,7 @@ struct Token {
     int linha;
     int coluna;
 };
+
 class SymbolTable {
     private:
         unordered_map<string, Token> table; 
@@ -29,20 +30,30 @@ class SymbolTable {
             return table.find(lexeme) != table.end();
         }
 
-        void print() {
-            cout << "\n" << string(70, '-') << endl;
-            cout << left << setw(20) << "LEXEMA" 
+        void print(const string& filename = "tabela_simbolos.txt") {
+            ofstream outFile(filename);
+
+            if (!outFile.is_open()) {
+                cerr << "Erro ao abrir o arquivo para salvar a tabela!" << endl;
+                return;
+            }
+
+            outFile << "\n" << string(70, '-') << endl;
+            outFile << left << setw(20) << "LEXEMA" 
                 << " | " << setw(20) << "TIPO" 
                 << " | " << "POSICAO ([Linha][Coluna])" << endl;
-            cout << string(70, '-') << endl;
+            outFile << string(70, '-') << endl;
 
             unordered_map<string, Token>::iterator it;
             for (it = table.begin(); it != table.end(); ++it) {
-                cout << left << setw(20) << it->first 
+                outFile << left << setw(20) << it->first 
                     << " | " << setw(20) << it->second.tipo 
-                    << " | " << "[" << it->second.linha << "]" << "[" << it->second.coluna << "]" << endl;
+                    << " | " << "[" << it->second.linha << "]" << "[" << it->second.coluna << "]"  << endl;
             }
-            cout << string(60, '-') << endl;
+            outFile << string(70, '-') << endl;
+
+            outFile.close(); 
+            cout << "\nTabela de simbolos salva com sucesso em: " << filename << endl;
         }
 }; 
 #endif
