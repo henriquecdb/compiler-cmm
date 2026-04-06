@@ -1,18 +1,37 @@
+#include "lexical.h"
 #include <bits/stdc++.h>
 
 using namespace std;
 
-int main()
-{
-    ifstream arquivo("input.txt");
-    if (!arquivo.is_open()) return 1;
+int main(int argc, char *argv[]) {
+    vector<string> reservedKeywords = {
+        "if",     "else", "while",   "for",  "return", "int",
+        "float",  "char", "double",  "void", "break",  "continue",
+        "switch", "case", "default", "do",   "struct", "typedef",
+        "const",  "true", "false", "readln", "bool", "print", "main",
+        "string", "class", "static", "include", "define","using","vector"
+    };
 
-    char c;
-    while (arquivo.get(c)) {
-        cout << c;
+    string afd = "testeComp.jff";;
+    string testFile;
+
+    if (argc > 1) {
+        testFile = argv[1];
+        cout << testFile << endl;
+    } else {
+        testFile = "input.txt";
     }
-    cout << endl;
 
-    arquivo.close();
+    Lexical lexical;
+    if (!lexical.loadAfd(afd)) {
+        cerr << "Nao foi possivel carregar o AFD do arquivo " << afd << endl;
+        return 1;
+    }
+
+    if (!lexical.run(testFile, reservedKeywords)) {
+        cerr << "Nao foi possivel abrir input.txt" << endl;
+        return 1;
+    }
+
     return 0;
 }
