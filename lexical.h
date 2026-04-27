@@ -21,8 +21,6 @@ class Lexical {
     static string extractTagValue(const string &block, const string &tag);
     static vector<unsigned char> decodeReadSymbol(const string &rawSymbol);
     static string stringToLower(const string &text);
-
-    bool accepts(const string &lexeme) const;
 };
 
 #endif

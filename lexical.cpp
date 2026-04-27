@@ -237,23 +237,6 @@ bool Lexical::loadAfd(const string &jflapPath) {
     return true;
 }
 
-bool Lexical::accepts(const string &lexeme) const {
-    if (initialState_ < 0 || transitionTable_.empty()) {
-        return false;
-    }
-
-    int state = initialState_;
-    for (unsigned char ch : lexeme) {
-        int next = transitionTable_[state][ch];
-        if (next < 0) {
-            return false;
-        }
-        state = next;
-    }
-
-    return finalStates_.find(state) != finalStates_.end();
-}
-
 bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
     SymbolTable sb;
     int linhaAtual = 1;
