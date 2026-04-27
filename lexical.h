@@ -5,9 +5,17 @@
 
 using namespace std;
 
+struct LexToken {
+    string tipo;
+    string lexema;
+    int linha;
+    int coluna;
+};
+
 class Lexical {
   public:
     bool loadAfd(const string &jflapPath);
+    bool tokenize(const string &inputPath, const vector<string> &reservedKeywords, vector<LexToken> &tokens) const;
     bool run(const string &inputPath, const vector<string> &reservedKeywords) const;
 
   private:

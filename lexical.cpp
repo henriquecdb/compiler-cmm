@@ -237,7 +237,7 @@ bool Lexical::loadAfd(const string &jflapPath) {
     return true;
 }
 
-bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
+bool Lexical::tokenize(const string &inputPath, const vector<string> &reservedKeywords, vector<LexToken> &tokens) const {
     SymbolTable sb;
     int linhaAtual = 1;
     int colunaAtual = 1;
@@ -302,7 +302,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
 
             string literal = input.substr(startContent, j - startContent);
             sb.insert(literal, "LIT_S", linhaInicioToken, colunaInicioToken);
-            cout << "LIT_S." << literal << '\n';
+            tokens.push_back({"LIT_S", literal, linhaInicioToken, colunaInicioToken});
 
             colunaAtual++;
             i = j + 1;
@@ -332,7 +332,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             } else {
                 string literal = input.substr(startContent, contentLen);
                 sb.insert(literal, "LIT_C", linhaInicioToken, colunaInicioToken);
-                cout << "LIT_C." << literal << '\n';
+                tokens.push_back({"LIT_C", literal, linhaInicioToken, colunaInicioToken});
             }
 
             colunaAtual += static_cast<int>((j - i) + 1);
@@ -376,11 +376,11 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             else if (reservedSet.count(lowerLexeme)) {
                 sb.insert(lexeme, lexeme, linhaAtual, colunaInicioToken);
                 transform(lowerLexeme.begin(), lowerLexeme.end(), lowerLexeme.begin(), ::toupper);
-                cout << lowerLexeme << '\n';
+                tokens.push_back({lowerLexeme, lexeme, linhaAtual, colunaInicioToken});
             } 
             else {
                 sb.insert(lexeme, "ID", linhaAtual, colunaInicioToken);
-                cout << "ID." << lexeme << '\n';
+                tokens.push_back({"ID", lexeme, linhaAtual, colunaInicioToken});
             }
             
             colunaAtual += (j - i);
@@ -411,7 +411,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                      << ", col " << colunaInicioToken << '\n';
                 
             } else {
-                cout << "NUM." << lexeme << '\n';
+                tokens.push_back({"NUM", lexeme, linhaAtual, colunaInicioToken});
             }
             
             colunaAtual += (j - i);
@@ -444,31 +444,31 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 lexeme = lexeme.substr(0, lexeme.size() - 1);
                 lastFinalPos--; 
             }
-            if (lexeme == "(") cout << "LPARENT\n";
-            else if (lexeme == ")") cout << "RPARENT\n";
-            else if (lexeme == "{") cout << "LBRACE\n";
-            else if (lexeme == "}") cout << "RBRACE\n";
-            else if (lexeme == "[") cout << "LBRACKET\n";
-            else if (lexeme == "]") cout << "RBRACKET\n";
-            else if (lexeme == ",") cout << "COMMA\n";
-            else if (lexeme == ";") cout << "SEMICOLON\n";
-            else if (lexeme == "+") cout << "PLUS\n"; 
-            else if (lexeme == "++") cout << "INC\n"; 
-            else if (lexeme == "-") cout << "MINUS\n";
-            else if (lexeme == "--") cout << "DEC\n";
-            else if (lexeme == "*") cout << "MULT\n"; 
-            else if (lexeme == "/") cout << "DIV\n";
-            else if (lexeme == "%") cout << "MOD\n";
-            else if (lexeme == "=") cout << "ASSING\n";
-            else if (lexeme == "<") cout << "LT\n";
-            else if (lexeme == ">") cout << "GT\n"; 
-            else if (lexeme == "<=") cout << "LEQ\n";
-            else if (lexeme == ">=") cout << "GEQ\n";
-            else if (lexeme == "==") cout << "EQ\n";
-            else if (lexeme == "!=") cout << "NEQ\n";
-            else if (lexeme == "!") cout << "NEG\n";
-            else if (lexeme == "&&") cout << "AND\n";
-            else if (lexeme == "||") cout << "OR\n";
+            if (lexeme == "(") tokens.push_back({"LPARENT", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == ")") tokens.push_back({"RPARENT", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "{") tokens.push_back({"LBRACE", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "}") tokens.push_back({"RBRACE", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "[") tokens.push_back({"LBRACKET", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "]") tokens.push_back({"RBRACKET", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == ",") tokens.push_back({"COMMA", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == ";") tokens.push_back({"SEMICOLON", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "+") tokens.push_back({"PLUS", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "++") tokens.push_back({"INC", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "-") tokens.push_back({"MINUS", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "--") tokens.push_back({"DEC", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "*") tokens.push_back({"MULT", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "/") tokens.push_back({"DIV", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "%") tokens.push_back({"MOD", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "=") tokens.push_back({"ASSING", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "<") tokens.push_back({"LT", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == ">") tokens.push_back({"GT", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "<=") tokens.push_back({"LEQ", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == ">=") tokens.push_back({"GEQ", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "==") tokens.push_back({"EQ", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "!=") tokens.push_back({"NEQ", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "!") tokens.push_back({"NEG", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "&&") tokens.push_back({"AND", lexeme, linhaAtual, colunaInicioToken});
+            else if (lexeme == "||") tokens.push_back({"OR", lexeme, linhaAtual, colunaInicioToken});
             else cout << "Erro lexico: " << lexeme << '\n';
             
             colunaAtual += (lastFinalPos - i);
@@ -479,8 +479,25 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         i++;
     }
 
-    cout << "EOF\n";
+    tokens.push_back({"EOF", "", linhaAtual, colunaAtual});
 
     sb.print();
+    return true;
+}
+
+bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
+    vector<LexToken> tokens;
+    if (!tokenize(inputPath, reservedKeywords, tokens)) {
+        return false;
+    }
+
+    for (const LexToken &token : tokens) {
+        if (token.tipo == "ID" || token.tipo == "NUM" || token.tipo == "LIT_S" || token.tipo == "LIT_C") {
+            cout << token.tipo << "." << token.lexema << '\n';
+        } else {
+            cout << token.tipo << '\n';
+        }
+    }
+
     return true;
 }
