@@ -217,12 +217,12 @@
 			<y>245.0</y>&#13;
 			<final/>&#13;
 		</state>&#13;
-		<state id="46" name="SEMICOLON">&#13;
+		<state id="46" name="48">&#13;
 			<x>1248.0</x>&#13;
 			<y>590.0</y>&#13;
 			<final/>&#13;
 		</state>&#13;
-		<state id="47" name="COMMA">&#13;
+		<state id="47" name="49">&#13;
 			<x>1236.0</x>&#13;
 			<y>638.0</y>&#13;
 			<final/>&#13;
