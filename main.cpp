@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
         "float",  "char", "double",  "void", "break",  "continue",
         "switch", "case", "default", "do",   "struct", "typedef",
         "const",  "true", "false", "readln", "bool", "print", "main",
-        "string", "class", "static", "include", "define","using","vector"
+        "string", "class", "static", "include", "define","using"
     };
 
     string afd = "testeComp.jff";;
