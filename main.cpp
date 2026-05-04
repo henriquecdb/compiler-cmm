@@ -1,4 +1,7 @@
 #include "lexical.h"
+#include "parser.h"
+#include "TokenBuffer.h"
+#include "ast.h"
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -8,11 +11,11 @@ int main(int argc, char *argv[]) {
         "if",     "else", "while",   "for",  "return", "int",
         "float",  "char", "double",  "void", "break",  "continue",
         "switch", "case", "default", "do",   "struct", "typedef",
-        "const",  "true", "false", "readln", "bool", "print", "main",
+        "const",  "true", "false", "readln", "bool", "print",
         "string", "class", "static", "include", "define","using","vector"
     };
 
-    string afd = "testeComp.jff";;
+    string afd = "testeComp.jff";
     string testFile;
 
     if (argc > 1) {
@@ -28,10 +31,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (!lexical.run(testFile, reservedKeywords)) {
-        cerr << "Nao foi possivel abrir input.txt" << endl;
-        return 1;
-    }
+    vector<LexToken> tokens = lexical.getTokens(testFile, reservedKeywords);
+
+    TokenBuffer tb(tokens);
+    Parser parser(tb);
+    ASTNode* root = parser.Program();
+
+    cout << "\nAST" << endl;
+    printAST(root);
 
     return 0;
 }

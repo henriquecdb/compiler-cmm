@@ -1,12 +1,10 @@
-/* ===== TESTE 3: programa mais completo ===== */
 int main(){
     int x;
     float y;
-    char c , a , b;
+    char c, a, b;
 
-    c = "Abcdei"
-    b = 'a'
-    a = 'ab';
+    c = 'z';
+    b = 'a';
 
     x = 10;
     y = 3.5;
