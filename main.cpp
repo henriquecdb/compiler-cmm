@@ -40,5 +40,8 @@ int main(int argc, char *argv[]) {
     cout << "\nAST" << endl;
     printAST(root);
 
+    string svgFile = "ast.svg";
+    writeASTSvg(root, svgFile);
+
     return 0;
 }

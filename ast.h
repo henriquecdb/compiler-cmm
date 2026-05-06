@@ -20,5 +20,6 @@ public:
 };
 
 void printAST(ASTNode* node, int level = 0);
+void writeASTSvg(ASTNode* node, const string& filename);
 
 #endif
