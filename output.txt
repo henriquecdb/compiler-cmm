@@ -1,0 +1,37 @@
+Erro lexico: literal nao fechado na linha 7, col 9
+Match: LPARENT (()
+Match: ID (x)
+Match: SEMICOLON (;)
+Match: ID (c)
+Match: ID (a)
+Match: ID (b)
+Match: SEMICOLON (;)
+Match: ID (c)
+-BLOCK
+  -ID.x
+  -ID.c
+  -ID.a
+  -ID.b
+  -ID.c
+Erro lexico: literal nao fechado na linha 7, col 9
+int
+main
+LPARENT
+RPARENT
+LBRACE
+int
+ID.x
+SEMICOLON
+float
+ID.y
+SEMICOLON
+char
+ID.c
+COMMA
+ID.a
+COMMA
+ID.b
+SEMICOLON
+ID.c
+ASSIGN
+EOF

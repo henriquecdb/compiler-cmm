@@ -15,8 +15,10 @@ struct LexToken {
 class Lexical {
   public:
     bool loadAfd(const string &jflapPath);
+    vector<LexToken> getTokens(const string &inputPath, const vector<string> &reservedKeywords);
     bool tokenize(const string &inputPath, const vector<string> &reservedKeywords, vector<LexToken> &tokens) const;
     bool run(const string &inputPath, const vector<string> &reservedKeywords) const;
+    
 
   private:
     int initialState_ = -1;
@@ -24,6 +26,7 @@ class Lexical {
     unordered_set<int> finalStates_;
     unordered_set<int> validFinalStates_;
     vector<string> stateNames_;
+    
 
     static string trim(const string &text);
     static string extractTagValue(const string &block, const string &tag);

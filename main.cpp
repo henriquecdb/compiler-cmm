@@ -1,4 +1,7 @@
 #include "lexical.h"
+#include "parser.h"
+#include "TokenBuffer.h"
+#include "ast.h"
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -12,7 +15,7 @@ int main(int argc, char *argv[]) {
         "string", "class", "static", "include", "define","using"
     };
 
-    string afd = "testeComp.jff";;
+    string afd = "testeComp.jff";
     string testFile;
 
     if (argc > 1) {
@@ -28,10 +31,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (!lexical.run(testFile, reservedKeywords)) {
-        cerr << "Nao foi possivel abrir input.txt" << endl;
-        return 1;
-    }
+    vector<LexToken> tokens = lexical.getTokens(testFile, reservedKeywords);
+
+    TokenBuffer tb(tokens);
+    Parser parser(tb);
+    ASTNode* root = parser.Program();
+
+    cout << "\nAST" << endl;
+    printAST(root);
+
+    string svgFile = "ast.svg";
+    writeASTSvg(root, svgFile);
 
     return 0;
 }

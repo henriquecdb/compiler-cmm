@@ -1,20 +1,16 @@
-
-----------------------------------------------------------------------
-LEXEMA               | TIPO                 | POSICAO ([Linha][Coluna])
-----------------------------------------------------------------------
-return               | return               | [20][5]
-readln               | readln               | [17][9]
-else                 | else                 | [16][6]
-if                   | if                   | [14][5]
-float                | float                | [4][5]
-char                 | char                 | [5][5]
-x                    | ID                   | [3][9]
+LEXEMA               | TIPO                 | POSIÇÃO
+b                    | ID                   | [5][18]
+=                    | ASSING               | [7][7]
 a                    | ID                   | [5][14]
+x                    | ID                   | [3][9]
 int                  | int                  | [2][1]
-print                | print                | [15][9]
+{                    | LBRACE               | [2][11]
+c                    | ID                   | [5][10]
+)                    | RPARENT              | [2][10]
+(                    | LPARENT              | [2][9]
+;                    | SEMICOLON            | [3][10]
+float                | float                | [4][5]
+,                    | COMMA                | [5][12]
+char                 | char                 | [5][5]
 main                 | main                 | [2][5]
 y                    | ID                   | [4][11]
-Abcdei               | LIT_S                | [7][9]
-c                    | ID                   | [5][10]
-b                    | ID                   | [5][18]
-----------------------------------------------------------------------
