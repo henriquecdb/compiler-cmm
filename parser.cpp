@@ -82,6 +82,9 @@ ASTNode* Parser::Decl() {
     }
 
     ASTNode* typeNode = Type();
+
+    printNonTerminal("C");
+
     string id = currentToken.lexema;
     match("ID");
 
@@ -146,7 +149,7 @@ ASTNode* Parser::VarDecl() {
 }
 
 ASTNode* Parser::VarDeclAfterType(ASTNode* typeNode, const string& firstId) {
-    printNonTerminal("VarDeclAfterType");
+    printNonTerminal("CVar");
     ASTNode* node = new ASTNode("VAR_DECL_LIST");
 
     ASTNode* first = new ASTNode("NAME_DECL");
@@ -192,7 +195,7 @@ ASTNode* Parser::ArrayOpt() {
 }
 
 ASTNode* Parser::FunctionDeclAfterType(ASTNode* typeNode, const string& id) {
-    printNonTerminal("FunctionDecl");
+    printNonTerminal("C1");
     ASTNode* node = new ASTNode("FUNCTION_DECL");
     node->add(typeNode);
     node->add(new ASTNode("ID." + id));
