@@ -237,15 +237,14 @@ bool Lexical::loadAfd(const string &jflapPath) {
     return true;
 }
 
-bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
+bool Lexical::tokenize(const string &inputPath, const vector<string> &reservedKeywords, vector<LexToken> &tokens) const {
     SymbolTable sb;
     int linhaAtual = 1;
     int colunaAtual = 1;
     ifstream inputFile(inputPath);
     if (!inputFile.is_open()) return false;
 
-    string input((istreambuf_iterator<char>(inputFile)),
-                 istreambuf_iterator<char>());
+    string input((istreambuf_iterator<char>(inputFile)), istreambuf_iterator<char>());
 
     unordered_set<string> reservedSet;
     for (const string &word : reservedKeywords) {
@@ -272,7 +271,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
                 i += 2;
                 colunaAtual +=2;
             }
-            else cout << "Erro lexico: comentario nao fechado\n";
+            else cerr << "Erro lexico: comentario nao fechado\n";
             continue;
         }
 
@@ -295,14 +294,14 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             }
 
             if (j >= input.size()) {
-                cout << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
+                cerr << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
                      << ", col " << colunaInicioToken << '\n';
                 break;
             }
 
             string literal = input.substr(startContent, j - startContent);
-            sb.insert(literal, "LIT_S", linhaInicioToken, colunaInicioToken);
-            cout << "LIT_S." << literal << '\n';
+           sb.insert(make_shared<TokenLiteral>(literal, "LIT_S", linhaInicioToken, colunaInicioToken));
+            tokens.push_back({"LIT_S", literal, linhaInicioToken, colunaInicioToken});
 
             colunaAtual++;
             i = j + 1;
@@ -320,7 +319,7 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             }
 
             if (j >= input.size() || input[j] != '\'') {
-                cout << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
+                cerr << "Erro lexico: literal nao fechado na linha " << linhaInicioToken
                      << ", col " << colunaInicioToken << '\n';
                 break;
             }
@@ -328,11 +327,11 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             size_t contentLen = j - startContent;
             if (contentLen > 1) {
                 string invalidLiteral = input.substr(startContent, contentLen);
-                cout << "Erro lexico: literal char invalido '" << invalidLiteral << "'\n";
+                cerr << "Erro lexico: literal char invalido '" << invalidLiteral << "'\n";
             } else {
                 string literal = input.substr(startContent, contentLen);
-                sb.insert(literal, "LIT_C", linhaInicioToken, colunaInicioToken);
-                cout << "LIT_C." << literal << '\n';
+                sb.insert(make_shared<TokenLiteral>(literal, "LIT_C", linhaInicioToken, colunaInicioToken));
+                tokens.push_back({"LIT_C", literal, linhaInicioToken, colunaInicioToken});
             }
 
             colunaAtual += static_cast<int>((j - i) + 1);
@@ -371,16 +370,17 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             string lowerLexeme = stringToLower(lexeme);
 
             if (erro) {
-                cout << "Erro lexico:" << lexeme << '\n';
+                cerr << "Erro lexico:" << lexeme << '\n';
             } 
             else if (reservedSet.count(lowerLexeme)) {
-                sb.insert(lexeme, lexeme, linhaAtual, colunaInicioToken);
-                transform(lowerLexeme.begin(), lowerLexeme.end(), lowerLexeme.begin(), ::toupper);
-                cout << lowerLexeme << '\n';
+                string tipoUpper = lowerLexeme;
+                transform(tipoUpper.begin(), tipoUpper.end(), tipoUpper.begin(), ::toupper);
+                sb.insert(make_shared<TokenKeyword>(lexeme, tipoUpper, linhaAtual, colunaInicioToken));
+                tokens.push_back({tipoUpper, lexeme, linhaAtual, colunaInicioToken});
             } 
             else {
-                sb.insert(lexeme, "ID", linhaAtual, colunaInicioToken);
-                cout << "ID." << lexeme << '\n';
+                sb.insert(make_shared<TokenId>(lexeme, linhaAtual, colunaInicioToken));
+                tokens.push_back({"ID", lexeme, linhaAtual, colunaInicioToken});
             }
             
             colunaAtual += (j - i);
@@ -407,11 +407,12 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
             string lexeme = input.substr(i, j - i);
 
             if (erro || lexeme.back() == '.') {
-                cout << "Erro lexico: " << lexeme << " na linha " << linhaAtual
+                cerr << "Erro lexico: " << lexeme << " na linha " << linhaAtual
                      << ", col " << colunaInicioToken << '\n';
                 
             } else {
-                cout << "NUM." << lexeme << '\n';
+                sb.insert(make_shared<TokenNum>(lexeme, linhaAtual, colunaInicioToken));
+                tokens.push_back({"NUM", lexeme, linhaAtual, colunaInicioToken});
             }
             
             colunaAtual += (j - i);
@@ -440,47 +441,84 @@ bool Lexical::run(const string &inputPath, const vector<string> &reservedKeyword
         //cout << lastFinalState <<endl;
         if (lastFinalState >= 0 && lastFinalPos > i) {
             string lexeme = input.substr(i, lastFinalPos - i);
-            if (stateNames_[lastFinalState] == "EHD"){ //funcao do * (pega -1 caractere para formar o token)
+            
+            // Suporte para múltiplos estados EHD conforme pedido pelo professor
+            if (stateNames_[lastFinalState].find("EHD") != string::npos) {
                 lexeme = lexeme.substr(0, lexeme.size() - 1);
                 lastFinalPos--; 
             }
-            if (lexeme == "(") cout << "LPARENT\n";
-            else if (lexeme == ")") cout << "RPARENT\n";
-            else if (lexeme == "{") cout << "LBRACE\n";
-            else if (lexeme == "}") cout << "RBRACE\n";
-            else if (lexeme == "[") cout << "LBRACKET\n";
-            else if (lexeme == "]") cout << "RBRACKET\n";
-            else if (lexeme == ",") cout << "COMMA\n";
-            else if (lexeme == ";") cout << "SEMICOLON\n";
-            else if (lexeme == "+") cout << "PLUS\n"; 
-            else if (lexeme == "++") cout << "INC\n"; 
-            else if (lexeme == "-") cout << "MINUS\n";
-            else if (lexeme == "--") cout << "DEC\n";
-            else if (lexeme == "*") cout << "MULT\n"; 
-            else if (lexeme == "/") cout << "DIV\n";
-            else if (lexeme == "%") cout << "MOD\n";
-            else if (lexeme == "=") cout << "ASSING\n";
-            else if (lexeme == "<") cout << "LT\n";
-            else if (lexeme == ">") cout << "GT\n"; 
-            else if (lexeme == "<=") cout << "LEQ\n";
-            else if (lexeme == ">=") cout << "GEQ\n";
-            else if (lexeme == "==") cout << "EQ\n";
-            else if (lexeme == "!=") cout << "NEQ\n";
-            else if (lexeme == "!") cout << "NEG\n";
-            else if (lexeme == "&&") cout << "AND\n";
-            else if (lexeme == "||") cout << "OR\n";
-            else cout << "Erro lexico: " << lexeme << '\n';
+
+            string tipo = "";
+            // Mapeamos o lexema para a variável tipo
+            if (lexeme == "(") tipo = "LPARENT";
+            else if (lexeme == ")") tipo = "RPARENT";
+            else if (lexeme == "{") tipo = "LBRACE";
+            else if (lexeme == "}") tipo = "RBRACE";
+            else if (lexeme == "[") tipo = "LBRACKET";
+            else if (lexeme == "]") tipo = "RBRACKET";
+            else if (lexeme == ",") tipo = "COMMA";
+            else if (lexeme == ";") tipo = "SEMICOLON";
+            else if (lexeme == "+") tipo = "PLUS";
+            else if (lexeme == "++") tipo = "INC";
+            else if (lexeme == "-") tipo = "MINUS";
+            else if (lexeme == "--") tipo = "DEC";
+            else if (lexeme == "*") tipo = "MULT";
+            else if (lexeme == "/") tipo = "DIV";
+            else if (lexeme == "%") tipo = "MOD";
+            else if (lexeme == "=") tipo = "ASSIGN";
+            else if (lexeme == "<") tipo = "LT";
+            else if (lexeme == ">") tipo = "GT";
+            else if (lexeme == "<=") tipo = "LEQ";
+            else if (lexeme == ">=") tipo = "GEQ";
+            else if (lexeme == "==") tipo = "EQ";
+            else if (lexeme == "!=") tipo = "NEQ";
+            else if (lexeme == "!") tipo = "NEG";
+            else if (lexeme == "&&") tipo = "AND";
+            else if (lexeme == "||") tipo = "OR";
+
+            
+            if (tipo != "") {
+                sb.insert(make_shared<TokenPontuacoes>(lexeme, tipo, linhaAtual, colunaInicioToken));
+                tokens.push_back({tipo, lexeme, linhaAtual, colunaInicioToken});
+            } else {
+                cerr << "Erro lexico: " << lexeme << " na linha " << linhaAtual << '\n';
+            }
             
             colunaAtual += (lastFinalPos - i);
             i = lastFinalPos;
             continue;
         }
-        cout << "Erro lexico: " << current << " na linha " << linhaAtual << ", col " << colunaAtual << '\n';
+        cerr << "Erro lexico: " << current << " na linha " << linhaAtual << ", col " << colunaAtual << '\n';
         i++;
     }
 
-    cout << "EOF\n";
+    tokens.push_back({"EOF", "", linhaAtual, colunaAtual});
 
-    sb.print();
+    //sb.print();
     return true;
+}
+
+bool Lexical::run(const string &inputPath, const vector<string> &reservedKeywords) const {
+    vector<LexToken> tokens;
+    if (!tokenize(inputPath, reservedKeywords, tokens)) {
+        return false;
+    }
+
+    for (const LexToken &token : tokens) {
+        if (token.tipo == "ID" || token.tipo == "NUM" || token.tipo == "LIT_S" || token.tipo == "LIT_C") {
+            cout << token.tipo << "." << token.lexema << '\n';
+        } else {
+            cout << token.tipo << '\n';
+        }
+    }
+
+    return true;
+}
+
+vector<LexToken> Lexical::getTokens(const string &inputPath, const vector<string> &reservedKeywords) {
+    vector<LexToken> tokens;
+    if (tokenize(inputPath, reservedKeywords, tokens)) {
+        return tokens;
+    }
+    return {};
 }
