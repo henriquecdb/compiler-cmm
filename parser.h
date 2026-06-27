@@ -36,10 +36,10 @@ public:
 
     ASTNode* VarDeclList();
     ASTNode* VarDecl();
-    ASTNode* VarDeclAfterType(ASTNode* typeNode, const string& firstId);
+    ASTNode* VarDeclAfterType(ASTNode* typeNode, const string& firstId, int firstLine, int firstCol);
     ASTNode* ArrayOpt();
 
-    ASTNode* FunctionDeclAfterType(ASTNode* typeNode, const string& id);
+    ASTNode* FunctionDeclAfterType(ASTNode* typeNode, const string& id, int idLine, int idCol);
 
     ASTNode* FormalList();
     ASTNode* FormalListRest(ASTNode* list);

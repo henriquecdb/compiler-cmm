@@ -2,9 +2,12 @@
 #include "parser.h"
 #include "TokenBuffer.h"
 #include "ast.h"
+#include "semantic.h"
 #include <bits/stdc++.h>
 
 using namespace std;
+
+int runSim(int argc, char* argv[]);
 
 int main(int argc, char *argv[]) {
     vector<string> reservedKeywords = {
@@ -42,6 +45,25 @@ int main(int argc, char *argv[]) {
 
     string svgFile = "ast.svg";
     writeASTSvg(root, svgFile);
+
+    SemanticAnalyzer semantic;
+    bool semanticOk = semantic.analyze(root);
+    semantic.writeSymbols("semantic_symbols.txt");
+    semantic.writeCode("3_code.txt");
+
+    char *simArgv[] = {
+        argv[0],
+        const_cast<char*>("3_code.txt")
+    };
+
+    runSim(2, simArgv);
+
+    if (!semanticOk) {
+        cerr << "analise semantica concluida com erros, consulte semantic_symbols.txt e 3_code.txt." << endl;
+        for (const auto& error : semantic.getErrors()) {
+            cerr << error << endl;
+        }
+    }
 
     return 0;
 }

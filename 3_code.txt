@@ -1,0 +1,19 @@
+function main returns int
+variable x : int
+variable y : float
+variable c : char
+variable a : char
+variable b : char
+c = 'z'
+b = 'a'
+x = 10
+y = 3.5
+t1 = x >= 10
+ifFalse t1 goto else1
+print x
+goto endif2
+else1:
+read x
+endif2:
+return x
+end function main

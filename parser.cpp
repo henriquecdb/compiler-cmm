@@ -86,13 +86,15 @@ ASTNode* Parser::Decl() {
     printNonTerminal("C");
 
     string id = currentToken.lexema;
+    int idLine = currentToken.linha;
+    int idCol = currentToken.coluna;
     match("ID");
 
     if (check("LPARENT")) {
-        return FunctionDeclAfterType(typeNode, id);
+        return FunctionDeclAfterType(typeNode, id, idLine, idCol);
     }
 
-    return VarDeclAfterType(typeNode, id);
+    return VarDeclAfterType(typeNode, id, idLine, idCol);
 }
 
 ASTNode* Parser::TypeDecl() {
@@ -144,28 +146,32 @@ ASTNode* Parser::VarDecl() {
     printNonTerminal("VarDecl");
     ASTNode* typeNode = Type();
     string id = currentToken.lexema;
+    int idLine = currentToken.linha;
+    int idCol = currentToken.coluna;
     match("ID");
-    return VarDeclAfterType(typeNode, id);
+    return VarDeclAfterType(typeNode, id, idLine, idCol);
 }
 
-ASTNode* Parser::VarDeclAfterType(ASTNode* typeNode, const string& firstId) {
+ASTNode* Parser::VarDeclAfterType(ASTNode* typeNode, const string& firstId, int firstLine, int firstCol) {
     printNonTerminal("CVar");
     ASTNode* node = new ASTNode("VAR_DECL_LIST");
 
-    ASTNode* first = new ASTNode("NAME_DECL");
+    ASTNode* first = new ASTNode("NAME_DECL", firstLine, firstCol);
     first->add(typeNode);
-    first->add(new ASTNode("ID." + firstId));
+    first->add(new ASTNode("ID." + firstId, firstLine, firstCol));
     first->add(ArrayOpt());
     node->add(first);
 
     while (check("COMMA")) {
         match("COMMA");
         string id = currentToken.lexema;
+        int idLine = currentToken.linha;
+        int idCol = currentToken.coluna;
         match("ID");
 
-        ASTNode* item = new ASTNode("NAME_DECL");
-        item->add(new ASTNode(typeNode ? typeNode->label : "TYPE.ERROR"));
-        item->add(new ASTNode("ID." + id));
+        ASTNode* item = new ASTNode("NAME_DECL", idLine, idCol);
+        item->add(new ASTNode(typeNode ? typeNode->label : "TYPE.ERROR", typeNode ? typeNode->linha : -1, typeNode ? typeNode->coluna : -1));
+        item->add(new ASTNode("ID." + id, idLine, idCol));
         item->add(ArrayOpt());
         node->add(item);
     }
@@ -194,11 +200,11 @@ ASTNode* Parser::ArrayOpt() {
     return node;
 }
 
-ASTNode* Parser::FunctionDeclAfterType(ASTNode* typeNode, const string& id) {
+ASTNode* Parser::FunctionDeclAfterType(ASTNode* typeNode, const string& id, int idLine, int idCol) {
     printNonTerminal("C1");
-    ASTNode* node = new ASTNode("FUNCTION_DECL");
+    ASTNode* node = new ASTNode("FUNCTION_DECL", idLine, idCol);
     node->add(typeNode);
-    node->add(new ASTNode("ID." + id));
+    node->add(new ASTNode("ID." + id, idLine, idCol));
 
     match("LPARENT");
     node->add(FormalList());
@@ -258,6 +264,8 @@ ASTNode* Parser::Stmt() {
     printNonTerminal("Stmt");
 
     if (check("IF")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("IF");
         match("LPARENT");
         ASTNode* cond = Expr();
@@ -266,7 +274,7 @@ ASTNode* Parser::Stmt() {
         match("ELSE");
         ASTNode* elseStmt = Stmt();
 
-        ASTNode* node = new ASTNode("IF");
+        ASTNode* node = new ASTNode("IF", stmtLine, stmtCol);
         node->add(cond);
         node->add(thenStmt);
         node->add(elseStmt);
@@ -274,62 +282,75 @@ ASTNode* Parser::Stmt() {
     }
 
     if (check("WHILE")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("WHILE");
         match("LPARENT");
         ASTNode* cond = Expr();
         match("RPARENT");
         ASTNode* body = Stmt();
 
-        ASTNode* node = new ASTNode("WHILE");
+        ASTNode* node = new ASTNode("WHILE", stmtLine, stmtCol);
         node->add(cond);
         node->add(body);
         return node;
     }
 
     if (check("BREAK")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("BREAK");
         match("SEMICOLON");
-        return new ASTNode("BREAK");
+        return new ASTNode("BREAK", stmtLine, stmtCol);
     }
 
     if (check("PRINT")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("PRINT");
         match("LPARENT");
         ASTNode* args = ExprList();
         match("RPARENT");
         match("SEMICOLON");
 
-        ASTNode* node = new ASTNode("PRINT");
+        ASTNode* node = new ASTNode("PRINT", stmtLine, stmtCol);
         node->add(args);
         return node;
     }
 
     if (check("READLN")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("READLN");
         match("LPARENT");
         ASTNode* expr = Expr();
         match("RPARENT");
         match("SEMICOLON");
 
-        ASTNode* node = new ASTNode("READ");
+        ASTNode* node = new ASTNode("READ", stmtLine, stmtCol);
         node->add(expr);
         return node;
     }
 
     if (check("RETURN")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("RETURN");
         ASTNode* expr = nullptr;
         if (!check("SEMICOLON")) expr = Expr();
         match("SEMICOLON");
 
-        ASTNode* node = new ASTNode("RETURN");
+        ASTNode* node = new ASTNode("RETURN", stmtLine, stmtCol);
         node->add(expr);
         return node;
     }
 
     if (check("LBRACE")) {
+        int stmtLine = currentToken.linha;
+        int stmtCol = currentToken.coluna;
         match("LBRACE");
-        ASTNode* block = StmtList();
+        ASTNode* block = new ASTNode("BLOCK", stmtLine, stmtCol);
+        block->add(StmtList());
         match("RBRACE");
         return block;
     }
