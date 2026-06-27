@@ -1,7 +1,8 @@
 NOME               | KIND         | TIPO               | ESCOPO
 main               | function     | int                | 0
-a                  | variable     | char               | 1
-b                  | variable     | char               | 1
-c                  | variable     | char               | 1
-x                  | variable     | int                | 1
+a                  | variable     | int                | 1
+b                  | variable     | int                | 1
+res_float          | variable     | float              | 1
+res_int            | variable     | int                | 1
+x                  | variable     | float              | 1
 y                  | variable     | float              | 1

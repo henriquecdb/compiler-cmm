@@ -1,19 +1,24 @@
 function main returns int
-variable x : int
+variable a : int
+variable b : int
+variable res_int : int
+variable x : float
 variable y : float
-variable c : char
-variable a : char
-variable b : char
-c = 'z'
-b = 'a'
-x = 10
-y = 3.5
-t1 = x >= 10
-ifFalse t1 goto else1
-print x
-goto endif2
-else1:
-read x
-endif2:
-return x
+variable res_float : float
+a = 5
+b = 2
+x = 10.5
+y = 2.0
+t1 = a * y
+t2 = x + t1
+t3 = b / 2.0
+t4 = t2 - t3
+res_float = t4
+t5 = a % b
+t6 = t5 * 3
+t7 = t6 + x
+res_int = t7
+print res_int
+print res_float
+return 0
 end function main
