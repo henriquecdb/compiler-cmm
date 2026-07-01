@@ -131,7 +131,7 @@ void ScopedSymbolTable::print(const string &filename) const
     if (!out.is_open())
         return;
 
-    out << left << setw(18) << "NOME" << " | " << setw(12) << "KIND" << " | " << setw(18) << "TIPO" << " | " << "ESCOPO" << '\n';
+    out << left << setw(18) << "NOME" << " | " << setw(12) << "CATEGORIA" << " | " << setw(18) << "TIPO" << " | " << "ESCOPO" << '\n';
     for (const auto &symbol : flatten())
     {
         out << left << setw(18) << symbol.name << " | " << setw(12) << kindToString(symbol.kind) << " | " << setw(18) << symbol.type.toString() << " | " << symbol.scopeLevel << '\n';
