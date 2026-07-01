@@ -1,19 +1,17 @@
 int main(){
-    int x;
-    float y;
-    char c, a, b;
+    int a, b, res_int;
+    float x, y, res_float;
 
-    c = 'z';
-    b = 'a';
+    a = 5;
+    b = 2;
+    x = 10.5;
+    y = 2.0;
 
-    x = 10;
-    y = 3.5;
+    res_float = x + a * y - (b / 2.0);
+    res_int = (a % b) * 3 + x;
 
-    if(x >= 10){
-        print(x);
-    }else{
-        readln(x);
-    }
+    print(res_int);
+    print(res_float);
 
-    return x;
+    return 0;
 }

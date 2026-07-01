@@ -6,12 +6,12 @@
 class TokenBuffer {
 private:
     vector<LexToken> tokens;
-    int index = 0;
+    size_t index = 0;
 
 public:
     TokenBuffer(const vector<LexToken>& t) : tokens(t) {}
 
-    LexToken peek() {
+    LexToken peek() const{
         if (index < tokens.size()) return tokens[index];
         return {"EOF", "", -1, -1};
     }
